@@ -1,0 +1,132 @@
+<aura:component controller="S1LookupController" 
+                implements="force:appHostable,flexipage:availableForAllPageTypes" access="global" >
+    
+    <ltng:require scripts="{!$Resource.jQuery}" afterScriptsLoaded="{!c.scriptsLoaded}"/>
+
+    <aura:attribute name="nuContact" type="Contact" />
+    
+    <aura:attribute name="loadMoreNumb" type="Integer" default="10" />
+    <aura:attribute name="typingTimer" type="Integer" default="0" />
+    
+    <aura:attribute name="contacts" type="List" />
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+
+    <div id="errorMessage" class="slds-notify_container" style="display:none;">
+        <div class="slds-notify slds-notify--toast slds-theme_alert-texture slds-theme_error" style="min-width: 20rem;">
+            <span class="slds-assistive-text">Info</span>
+            <button class="slds-button slds-notify__close slds-button--icon-inverse" title="Close">
+                <lightning:icon class="slds-button__icon slds-button__icon--large" onclick="{!c.closeErrorMessage}"  
+                                iconName="utility:close" size="xx-small" variant="inverse" />
+            </button>
+            <div class="slds-notify__content">
+                <h2 class="slds-text-heading--small" id="messageError">Base Toast</h2>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainPanel">
+        <div class="slds-page-header">
+            <div class="slds-grid">
+                <div class="slds-col slds-size--1-of-3">
+                    <ui:button label="Cancel" press="{!c.handleCancelNewTask}" />
+                </div>
+                <div class="slds-col slds-size--1-of-3 slds-align_absolute-center">
+                    <h2 class="scope-title truncate" >Lookup Demo</h2>
+                </div>
+                <div class="slds-col slds-size--1-of-3">
+                    
+                </div>
+            </div>
+        </div>
+        <aura:if isTrue="{!false}">
+            <div> Error messages </div>
+        </aura:if>
+        <div style="display: block; overflow: hidden;">
+        	<div class="slds-grid">
+                <div class="slds-col--padded slds-size--1-of-1 slds-medium-size--1-of-1">
+                    <div class="slds-form-element">                        
+                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_right">
+                            <div><label class="slds-form-element__label">Contact</label></div>
+                        	<lightning:icon iconName="utility:search" size="xx-small" onclick="{!c.toogleContact}"  
+                                            style="position: absolute; right: 9px; top: 32px;" />
+                            <ui:inputText value="{!v.nuContact.Name}" click="{!c.toogleContact}" />
+                        </div>
+                    </div> 
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="srchContactPnl" class="slds-scope" style="display: none;">
+        <div>
+            <div class="slds-page-header">
+                <div class="slds-grid">
+                    <div class="slds-col slds-size--1-of-3"> 
+                    	<lightning:button label="Cancel" onclick="{!c.toogleContact}" />
+                    </div>
+                    <div class="slds-col slds-size--2-of-3 slds-align_absolute-center">
+                        <h2 class="scope-title truncate">Search Contact</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="slds-col--padded slds-size--1-of-1 slds-medium-size--1-of-1">
+                <div style="padding: 10px 0;">
+                    <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon_right">
+                        <lightning:icon iconName="utility:close" size="xx-small" onclick="{!c.clearContactTyping}"
+                                        style="position: absolute; right: 9px; top: 9px;" />
+                        <input id="srchContactTxt" type="text" placeholder="Search Contact" 
+                               class="input uiInput uiInputText uiInput--default uiInput--input"
+                               onkeyup="{!c.doneContactTyping}" />
+                    </div>
+                </div> 
+            </div>
+            <div class="slds-page-header">
+                <div class="slds-grid">
+                    <div class="slds-media__figure">
+                        <div class="slds-icon" style="background-color: #A094ED">
+                            <span class=""> <lightning:icon iconName="standard:contact" /> </span>
+                        </div>
+                    </div>
+                    <div class="slds-media__body"> Contact </div>
+                </div>
+            </div>
+        </div>
+        <div style="display: block; overflow: hidden;">
+            <div>
+                <div class="slds-col--padded slds-size--1-of-1 slds-medium-size--1-of-1">
+                    <div id="srchContactResult" style="padding: 10px 0;">
+                        <div class="slds-media__body"> <p> No Results...</p> </div>
+                    </div>
+                    <div class="loadSpinner" id="contactSpinner" style="display:none"><ui:spinner /></div>
+                </div>
+                <div>
+                    <table class="slds-table slds-table--bordered" style="border-top:0;">
+                        <tbody>
+							<aura:iteration items="{!v.contacts}" var="contact">
+                            <tr>
+                                <td>
+                                    <div class="slds-col--padded slds-size--1-of-1 slds-medium-size--1-of-1">
+                                        <div style="padding: 10px 0;">
+                                            <a href="javascript:void()" data-record="{!contact.Id}" onmouseover="{!c.loadContact}">
+                                                <div class="slds-media__body">
+                                                    <p class="name slds-truncate">{!contact.Name}</p>
+                                                    <p class="disambiguation slds-text-color--weak slds-truncate ">{!contact.Account.Name}</p>
+                                                </div>
+                                            </a>
+                                        </div>                                               
+                                    </div>
+                                </td>
+                            </tr>
+                            </aura:iteration>
+                        </tbody>
+                    </table>
+                    <div id="srchContactMore" class="slds-text-align--center slds-is-relative" style="display: none; margin: .75rem;line-height:50px;">
+                        <lightning:button label="Load more" onclick="{!c.searchContactMore}" />
+                    </div>
+                </div>
+            </div>
+        </div> 
+    </div>
+       
+</aura:component>

@@ -1,0 +1,7 @@
+.THIS{
+    background-color: #fff;
+    height: 100vh;
+}
+.THIS .toggle {
+    display: none;
+}
