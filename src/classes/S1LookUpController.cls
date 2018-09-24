@@ -19,8 +19,7 @@ public class S1LookUpController {
     **/
     @AuraEnabled
     public static Contact selectedContact( String contactId ){
-        List<Contact> cList = [SELECT Id, Name, Contact_Frequency__c, Potential__c, Relationship_Strength__c 
-                               FROM Contact WHERE Id = :contactId LIMIT 1];
+        List<Contact> cList = [SELECT Id, Name FROM Contact WHERE Id = :contactId LIMIT 1];
 		return cList.get(0);
     }
 }
